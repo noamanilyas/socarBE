@@ -4,26 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
 var homeRouter = require('./routes/home');
 var adminRouter = require('./routes/admin');
 var db = require('./dbConfig');
-// const cors = require('cors');
-
-// var mysql = require("mysql");
-// var con = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "",
-//   database: "bookreader"
-// });
-// con.connect(function(err){
-//   if(err){
-//     console.log('Error connecting to Db');
-//     return;
-//   }
-//   console.log('Connection established');
-// });
 
 var app = express();
 // app.use(cors());
@@ -44,12 +27,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function(req,res,next){
-  req.con = con;
-  next();
-});
-
-app.use('/', indexRouter);
 app.use('/home', homeRouter);
 app.use('/admin', adminRouter);
 

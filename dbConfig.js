@@ -32,5 +32,6 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
  
 db.images = require('./models/img.model.js')(sequelize, Sequelize);
+db.comments = require('./models/comment.model.js')(sequelize, Sequelize);
  
 module.exports = db;
