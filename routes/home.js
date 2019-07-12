@@ -1,18 +1,19 @@
-var express = require('express');
-var router = express.Router();
-const path = require('path');
-var formidable = require('formidable');
-var fs = require('fs');
-var db = require('../dbConfig');
+import { Router } from 'express';
+let router = Router();
+import path from 'path';
+import formidable from 'formidable';
+import fs from 'fs';
+
+import { images as _images, Sequelize, comments as _comments } from '../dbConfig';
 
 router.get('/getAllBulletin', async (req, res, next) => {
 	try {
-		const Image = db.images;
+		const Image = _images;
 		let result = await Image.findAll({
 			order: [
 	        	['id', 'DESC']
 	        ],
-	        attributes: ['id', "img", "title", [db.Sequelize.fn('LEFT', db.Sequelize.col('content'), 255), 'content']]
+	        attributes: ['id', "img", "title", [Sequelize.fn('LEFT', Sequelize.col('content'), 255), 'content']]
 	    });
 		res.send({'Status': 1, 'Msg': 'Get data successfull.', 'Data': result});
 	} catch (err) {
@@ -23,8 +24,8 @@ router.get('/getAllBulletin', async (req, res, next) => {
 router.get('/getBulletinById', async (req, res, next) => {
 	try {
 		let bulletinId = req.query.id;
-		const Image = db.images;
-		const Comment = db.comments;
+		const Image = _images;
+		const Comment = _comments;
 
 		let images = await Image.findOne({
 			where: { id: bulletinId },
@@ -48,4 +49,4 @@ router.get('/getBulletinById', async (req, res, next) => {
 
 });
 
-module.exports = router;
+export default router;

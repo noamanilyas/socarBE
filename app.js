@@ -1,15 +1,17 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+import http from 'http';
+import express from 'express';
+import logger from 'morgan';
+import bodyParser from 'body-parser';
+import path from 'path';
 
-var homeRouter = require('./routes/home');
-var adminRouter = require('./routes/admin');
-var db = require('./dbConfig');
+import homeRouter from './routes/home';
+import adminRouter from './routes/admin';
+import db from './dbConfig';
 
-var app = express();
-// app.use(cors());
+const hostname = '127.0.0.1';
+const port = 3000;
+const app = express() // setup express application
+const server = http.createServer(app);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -17,23 +19,20 @@ app.use(function(req, res, next) {
   next();
 });
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use(logger('dev')); // log requests to the console
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// Parse incoming requests data
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/home', homeRouter);
 app.use('/admin', adminRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+app.get('*', (req, res) => res.status(200).send({
+  message: 'Welcome to the default API route',
+}));
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -46,4 +45,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});

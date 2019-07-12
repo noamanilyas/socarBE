@@ -1,15 +1,16 @@
-var express = require('express');
-var router = express.Router();
-var formidable = require('formidable');
-var fs = require('fs');
-var path = require('path');
-var db = require('../dbConfig');
+import { Router } from 'express';
+let router = Router();
+import { IncomingForm } from 'formidable';
+import fs from 'fs';
+import { resolve, join } from 'path';
 
-var ImagesPath = path.resolve(__dirname, '../public/images/');
+import { images, Sequelize, comments } from '../dbConfig';
+
+let ImagesPath = resolve(__dirname, '../public/images/');
 
 router.post('/addBulletin', (req, res, next) => {
 
-    var form = new formidable.IncomingForm();
+    let form = new IncomingForm();
     
     form.parse(req);
 
@@ -17,9 +18,9 @@ router.post('/addBulletin', (req, res, next) => {
 
     form.on('fileBegin', (name, file) => {
         fields['name'] = file.name;
-        var date = Date.now();
-        file.path = path.join(ImagesPath, date + fields.name);
-        fields['img'] = path.join(ImagesPath, date + fields.name);
+        let date = Date.now();
+        file.path = join(ImagesPath, date + fields.name);
+        fields['img'] = join(ImagesPath, date + fields.name);
         fields['type'] = file.type;
         fields['path'] = '/images/' + date + fields.name;
     });
@@ -30,7 +31,7 @@ router.post('/addBulletin', (req, res, next) => {
 
     form.on('end', async () => {
         console.log(fields.content);
-        const Image = db.images;
+        const Image = images;
 
         const image = Image.build({
             title: fields.title,
@@ -44,7 +45,7 @@ router.post('/addBulletin', (req, res, next) => {
             let createRecord = await image.save();
             let results = await Image.findAll({
                 order: [ ['id', 'DESC'] ],
-                attributes: ['id', "img", "title", [db.Sequelize.fn('LEFT', db.Sequelize.col('content'), 255), 'content']]
+                attributes: ['id', "img", "title", [Sequelize.fn('LEFT', Sequelize.col('content'), 255), 'content']]
             })
             res.send({'Status': 1, 'Msg': 'Get data successfull.', 'Data': results});
         } catch (err) {
@@ -55,10 +56,10 @@ router.post('/addBulletin', (req, res, next) => {
 
 router.post('/addNewComment', async (req, res, next) => {
 
-    var text = req.body.text;
-    var bulletinId = req.body.bulletinId;
+    let text = req.body.text;
+    let bulletinId = req.body.bulletinId;
 
-    const Comment = db.comments;
+    const Comment = comments;
 
     const comment = Comment.build({
         text: text,
@@ -78,4 +79,4 @@ router.post('/addNewComment', async (req, res, next) => {
     }
 });
 
-module.exports = router;
+export default router;
